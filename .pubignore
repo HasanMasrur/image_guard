@@ -1,0 +1,21 @@
+# NOTE: when .pubignore exists pub ignores the root .gitignore, so repeat it here.
+
+# Build output
+.dart_tool/
+build/
+**/build/
+rust/target/
+.flutter-plugins-dependencies
+pubspec.lock
+coverage/
+
+# IDE / OS
+*.iml
+.idea/
+.vscode/
+.DS_Store
+.fvmrc
+
+# Development-only files (Bangla planning notes)
+SAFE_IMAGE_PLAN.md
+PUBLISH_GUIDE.md

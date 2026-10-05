@@ -1,0 +1,41 @@
+[package]
+name = "image_guard"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+flutter_rust_bridge = "=2.13.0"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif", "bmp"] }
+fast_image_resize = { version = "6", features = ["image"] }
+jpeg-encoder = "0.7"
+thiserror = "2"
+# libc 0.2.190 hides _dyld_* on iOS, which breaks `backtrace` (used by
+# flutter_rust_bridge). Remove this pin once backtrace/libc are fixed.
+libc = ">=0.2.150, <0.2.190"
+
+[dev-dependencies]
+proptest = "1"
+crc32fast = "1"
+
+# Image codecs are ~20x slower unoptimized; keep debug app builds usable.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+# Xcode 27's strip corrupts macOS dylibs ("mis-aligned LINKEDIT string pool").
+# Android Gradle and Xcode strip release binaries themselves.
+strip = "none"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

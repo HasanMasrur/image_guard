@@ -1,0 +1,37 @@
+name: image_guard
+description: "On-device image compression to an exact byte limit and resolution, with a Rust core. NSFW detection coming next."
+version: 0.1.0-dev.1
+repository: https://github.com/HasanMasrur/image_guard
+issue_tracker: https://github.com/HasanMasrur/image_guard/issues
+topics:
+  - image
+  - compression
+  - ffi
+  - rust
+
+environment:
+  sdk: ^3.11.5
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_rust_bridge: 2.13.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  image: ^4.5.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        ffiPlugin: true
+      ios:
+        ffiPlugin: true
+      macos:
+        ffiPlugin: true
