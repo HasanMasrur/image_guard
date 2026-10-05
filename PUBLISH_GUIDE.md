@@ -1,5 +1,40 @@
 # image_guard — pub.dev-তে Publish করার Guide
 
+## 🟢 এখনকার অবস্থা (আপডেট)
+
+**যা করা হয়ে গেছে:**
+
+| কাজ | অবস্থা |
+|-----|--------|
+| `pubspec.yaml` থেকে `publish_to: none` মুছে ফেলা | ✅ |
+| LICENSE → MIT (Copyright: HasanMasrur) | ✅ নাম বদলাতে চাইলে `LICENSE` file-এ গিয়ে বদলে নাও |
+| `pubspec.yaml`-এ `repository` + `issue_tracker` | ✅ |
+| `.pubignore` (build ফাইল আর এই বাংলা guide গুলো package-এ যাবে না) | ✅ |
+| `.gitignore`-এ `rust/target` | ✅ |
+| Git repo + প্রথম commit + GitHub-এ push | ✅ https://github.com/HasanMasrur/image_guard |
+| `dart pub publish --dry-run` | ✅ archive 281 KB, শুধু একটা warning, যেটা উপেক্ষা করা যায় (নিচে ব্যাখ্যা আছে) |
+
+তোমার paste করা GitHub command-এর `echo "# image_guard" >> README.md` লাইনটা আমি চালাইনি। ওটা চালালে আমাদের লেখা README-এর শেষে একটা বাড়তি লাইন জুড়ে যেত। বাকি command গুলোর কাজ (`git init`, commit, `branch -M main`, `remote add`, `push`) সব করা হয়েছে।
+
+### 👉 এখন তোমার কাজ: শুধু publish command চালানো
+
+VS Code-এর terminal-এ project folder (`safe_image`) থেকে:
+
+```bash
+dart pub publish
+```
+
+1. File-এর একটা list আর flutter_rust_bridge-এর warning দেখাবে। এটা স্বাভাবিক।
+2. প্রশ্ন আসবে `Do you want to publish image_guard 0.1.0-dev.1 ...? (y/N)` → **y** লিখে Enter চাপো
+3. Browser খুলবে → Google account দিয়ে login করো → **Allow** চাপো
+4. ২–৫ মিনিট পরে দেখো: https://pub.dev/packages/image_guard
+
+> ⚠️ একবার publish করলে version আর মুছে ফেলা যায় না। মনে রেখো, এটা `-dev` version, আর এখন ব্যবহারকারীর machine-এ Rust লাগবে (README-তে লেখা আছে)।
+
+Publish হয়ে গেলে আমাকে জানাও। পরের ধাপ: **precompiled binary** (ধাপ ২), যাতে ব্যবহারকারীর Rust না লাগে।
+
+---
+
 > আমি তোমার package-এর একটা কপিতে `dart pub publish --dry-run` চালিয়ে দেখেছি। এটা আসলে publish করে না, শুধু check করে। ফল: package publish করার মতো অবস্থায় আছে, archive size মাত্র **292 KB**। তবে publish করার আগে নিচের কয়েকটা জিনিস ঠিক করতে হবে।
 
 ---
