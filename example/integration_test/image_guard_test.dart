@@ -65,6 +65,38 @@ void main() {
     expect(r.keptOriginal, isTrue);
   });
 
+  test('model loads from the package asset and classifies', () async {
+    await SafeImage.initialize();
+    final r = await SafeImage.classify(
+      SafeImageSource.bytes(photoJpeg(800, 600)),
+    );
+    // ignore: avoid_print
+    print('device classify: $r');
+    expect(r.verdict, isNot(Verdict.unsafe));
+    final sum = r.scores.toMap().values.reduce((a, b) => a + b);
+    expect(sum, closeTo(1, 0.01));
+  });
+
+  test('process: 12 MP photo → safe + 50 KB on device', () async {
+    final r = await SafeImage.process(
+      SafeImageSource.bytes(photoJpeg(4000, 3000)),
+      options: SafeImageOptions(maxBytes: 50.kb),
+    );
+    // ignore: avoid_print
+    print('device process: $r');
+    expect(r.isUnsafe, isFalse);
+    expect(r.image!.sizeBytes, lessThanOrEqualTo(50.kb));
+  });
+
+  test('process: unsafe verdict blocks the image', () async {
+    final r = await SafeImage.process(
+      SafeImageSource.bytes(photoJpeg(300, 200)),
+      safety: const SafetyOptions(rejectThreshold: 0, reviewThreshold: 0),
+    );
+    expect(r.isUnsafe, isTrue);
+    expect(r.image, isNull);
+  });
+
   test('errors map to SafeImageException', () async {
     await expectLater(
       SafeImage.compress(SafeImageSource.bytes(Uint8List.fromList([1, 2, 3]))),

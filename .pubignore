@@ -20,3 +20,4 @@ coverage/
 SAFE_IMAGE_PLAN.md
 PUBLISH_GUIDE.md
 HOW_TO_PUBLISH.md
+tool/build/

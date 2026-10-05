@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/compress.dart';
+import 'api/safety.dart';
 import 'api/types.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -67,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -940318354;
+  int get rustContentHash => 2034610273;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,6 +80,16 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<SafetyReport> crateApiSafetyClassifyBytes({
+    required List<int> bytes,
+    required SafetyOptions safety,
+  });
+
+  Future<SafetyReport> crateApiSafetyClassifyFile({
+    required String path,
+    required SafetyOptions safety,
+  });
+
   Future<CompressResult> crateApiCompressCompressBytes({
     required List<int> bytes,
     required CompressOptions options,
@@ -97,6 +108,26 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiCompressInitApp();
 
+  bool crateApiSafetyIsModelLoaded();
+
+  Future<void> crateApiSafetyLoadModel({required List<int> model});
+
+  Future<ProcessResult> crateApiSafetyProcessBytes({
+    required List<int> bytes,
+    required CompressOptions options,
+    required SafetyOptions safety,
+  });
+
+  Future<ProcessResult> crateApiSafetyProcessFile({
+    required String path,
+    required CompressOptions options,
+    required SafetyOptions safety,
+  });
+
+  Future<SafetyOptions> crateApiTypesSafetyOptionsDefault();
+
+  void crateApiSafetyUnloadModel();
+
   void crateApiCompressValidateCompressOptions({
     required CompressOptions options,
   });
@@ -109,6 +140,75 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required super.generalizedFrbRustBinding,
     required super.portManager,
   });
+
+  @override
+  Future<SafetyReport> crateApiSafetyClassifyBytes({
+    required List<int> bytes,
+    required SafetyOptions safety,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(bytes, serializer);
+          sse_encode_box_autoadd_safety_options(safety, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_safety_report,
+          decodeErrorData: sse_decode_image_guard_error,
+        ),
+        constMeta: kCrateApiSafetyClassifyBytesConstMeta,
+        argValues: [bytes, safety],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSafetyClassifyBytesConstMeta =>
+      const TaskConstMeta(
+        debugName: "classify_bytes",
+        argNames: ["bytes", "safety"],
+      );
+
+  @override
+  Future<SafetyReport> crateApiSafetyClassifyFile({
+    required String path,
+    required SafetyOptions safety,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(path, serializer);
+          sse_encode_box_autoadd_safety_options(safety, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_safety_report,
+          decodeErrorData: sse_decode_image_guard_error,
+        ),
+        constMeta: kCrateApiSafetyClassifyFileConstMeta,
+        argValues: [path, safety],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSafetyClassifyFileConstMeta => const TaskConstMeta(
+    debugName: "classify_file",
+    argNames: ["path", "safety"],
+  );
 
   @override
   Future<CompressResult> crateApiCompressCompressBytes({
@@ -124,7 +224,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 1,
+            funcId: 3,
             port: port_,
           );
         },
@@ -159,7 +259,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 4,
             port: port_,
           );
         },
@@ -189,7 +289,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 5,
             port: port_,
           );
         },
@@ -217,7 +317,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 6,
             port: port_,
           );
         },
@@ -245,7 +345,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 7,
             port: port_,
           );
         },
@@ -272,7 +372,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 8,
             port: port_,
           );
         },
@@ -291,6 +391,177 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
+  bool crateApiSafetyIsModelLoaded() {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSafetyIsModelLoadedConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSafetyIsModelLoadedConstMeta =>
+      const TaskConstMeta(debugName: "is_model_loaded", argNames: []);
+
+  @override
+  Future<void> crateApiSafetyLoadModel({required List<int> model}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(model, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 10,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_image_guard_error,
+        ),
+        constMeta: kCrateApiSafetyLoadModelConstMeta,
+        argValues: [model],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSafetyLoadModelConstMeta =>
+      const TaskConstMeta(debugName: "load_model", argNames: ["model"]);
+
+  @override
+  Future<ProcessResult> crateApiSafetyProcessBytes({
+    required List<int> bytes,
+    required CompressOptions options,
+    required SafetyOptions safety,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(bytes, serializer);
+          sse_encode_box_autoadd_compress_options(options, serializer);
+          sse_encode_box_autoadd_safety_options(safety, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 11,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_process_result,
+          decodeErrorData: sse_decode_image_guard_error,
+        ),
+        constMeta: kCrateApiSafetyProcessBytesConstMeta,
+        argValues: [bytes, options, safety],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSafetyProcessBytesConstMeta => const TaskConstMeta(
+    debugName: "process_bytes",
+    argNames: ["bytes", "options", "safety"],
+  );
+
+  @override
+  Future<ProcessResult> crateApiSafetyProcessFile({
+    required String path,
+    required CompressOptions options,
+    required SafetyOptions safety,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(path, serializer);
+          sse_encode_box_autoadd_compress_options(options, serializer);
+          sse_encode_box_autoadd_safety_options(safety, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 12,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_process_result,
+          decodeErrorData: sse_decode_image_guard_error,
+        ),
+        constMeta: kCrateApiSafetyProcessFileConstMeta,
+        argValues: [path, options, safety],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSafetyProcessFileConstMeta => const TaskConstMeta(
+    debugName: "process_file",
+    argNames: ["path", "options", "safety"],
+  );
+
+  @override
+  Future<SafetyOptions> crateApiTypesSafetyOptionsDefault() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 13,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_safety_options,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiTypesSafetyOptionsDefaultConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiTypesSafetyOptionsDefaultConstMeta =>
+      const TaskConstMeta(debugName: "safety_options_default", argNames: []);
+
+  @override
+  void crateApiSafetyUnloadModel() {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSafetyUnloadModelConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSafetyUnloadModelConstMeta =>
+      const TaskConstMeta(debugName: "unload_model", argNames: []);
+
+  @override
   void crateApiCompressValidateCompressOptions({
     required CompressOptions options,
   }) {
@@ -299,7 +570,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_box_autoadd_compress_options(options, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -334,6 +605,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   CompressOptions dco_decode_box_autoadd_compress_options(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_compress_options(raw);
+  }
+
+  @protected
+  CompressResult dco_decode_box_autoadd_compress_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_compress_result(raw);
+  }
+
+  @protected
+  SafetyOptions dco_decode_box_autoadd_safety_options(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_safety_options(raw);
   }
 
   @protected
@@ -397,6 +680,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double dco_decode_f_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as double;
+  }
+
+  @protected
   int dco_decode_i_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -448,6 +737,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  CompressResult? dco_decode_opt_box_autoadd_compress_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_compress_result(raw);
+  }
+
+  @protected
   int? dco_decode_opt_box_autoadd_u_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_u_32(raw);
@@ -463,6 +758,61 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   OutputFormat dco_decode_output_format(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return OutputFormat.values[raw as int];
+  }
+
+  @protected
+  ProcessResult dco_decode_process_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return ProcessResult(
+      safety: dco_decode_safety_report(arr[0]),
+      image: dco_decode_opt_box_autoadd_compress_result(arr[1]),
+    );
+  }
+
+  @protected
+  SafetyOptions dco_decode_safety_options(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return SafetyOptions(
+      rejectThreshold: dco_decode_f_32(arr[0]),
+      reviewThreshold: dco_decode_f_32(arr[1]),
+      suggestiveWeight: dco_decode_f_32(arr[2]),
+      compressUnsafe: dco_decode_bool(arr[3]),
+    );
+  }
+
+  @protected
+  SafetyReport dco_decode_safety_report(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return SafetyReport(
+      verdict: dco_decode_verdict(arr[0]),
+      nsfwScore: dco_decode_f_32(arr[1]),
+      scores: dco_decode_safety_scores(arr[2]),
+      elapsedMs: dco_decode_u_32(arr[3]),
+    );
+  }
+
+  @protected
+  SafetyScores dco_decode_safety_scores(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    return SafetyScores(
+      drawings: dco_decode_f_32(arr[0]),
+      hentai: dco_decode_f_32(arr[1]),
+      neutral: dco_decode_f_32(arr[2]),
+      porn: dco_decode_f_32(arr[3]),
+      sexy: dco_decode_f_32(arr[4]),
+    );
   }
 
   @protected
@@ -484,6 +834,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  Verdict dco_decode_verdict(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return Verdict.values[raw as int];
+  }
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_list_prim_u_8_strict(deserializer);
@@ -502,6 +858,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_compress_options(deserializer));
+  }
+
+  @protected
+  CompressResult sse_decode_box_autoadd_compress_result(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_compress_result(deserializer));
+  }
+
+  @protected
+  SafetyOptions sse_decode_box_autoadd_safety_options(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_safety_options(deserializer));
   }
 
   @protected
@@ -582,6 +954,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double sse_decode_f_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getFloat32();
+  }
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
@@ -634,6 +1012,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  CompressResult? sse_decode_opt_box_autoadd_compress_result(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_compress_result(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -663,6 +1054,61 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ProcessResult sse_decode_process_result(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_safety = sse_decode_safety_report(deserializer);
+    var var_image = sse_decode_opt_box_autoadd_compress_result(deserializer);
+    return ProcessResult(safety: var_safety, image: var_image);
+  }
+
+  @protected
+  SafetyOptions sse_decode_safety_options(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_rejectThreshold = sse_decode_f_32(deserializer);
+    var var_reviewThreshold = sse_decode_f_32(deserializer);
+    var var_suggestiveWeight = sse_decode_f_32(deserializer);
+    var var_compressUnsafe = sse_decode_bool(deserializer);
+    return SafetyOptions(
+      rejectThreshold: var_rejectThreshold,
+      reviewThreshold: var_reviewThreshold,
+      suggestiveWeight: var_suggestiveWeight,
+      compressUnsafe: var_compressUnsafe,
+    );
+  }
+
+  @protected
+  SafetyReport sse_decode_safety_report(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_verdict = sse_decode_verdict(deserializer);
+    var var_nsfwScore = sse_decode_f_32(deserializer);
+    var var_scores = sse_decode_safety_scores(deserializer);
+    var var_elapsedMs = sse_decode_u_32(deserializer);
+    return SafetyReport(
+      verdict: var_verdict,
+      nsfwScore: var_nsfwScore,
+      scores: var_scores,
+      elapsedMs: var_elapsedMs,
+    );
+  }
+
+  @protected
+  SafetyScores sse_decode_safety_scores(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_drawings = sse_decode_f_32(deserializer);
+    var var_hentai = sse_decode_f_32(deserializer);
+    var var_neutral = sse_decode_f_32(deserializer);
+    var var_porn = sse_decode_f_32(deserializer);
+    var var_sexy = sse_decode_f_32(deserializer);
+    return SafetyScores(
+      drawings: var_drawings,
+      hentai: var_hentai,
+      neutral: var_neutral,
+      porn: var_porn,
+      sexy: var_sexy,
+    );
+  }
+
+  @protected
   int sse_decode_u_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint32();
@@ -677,6 +1123,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_decode_unit(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  Verdict sse_decode_verdict(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return Verdict.values[inner];
   }
 
   @protected
@@ -698,6 +1151,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_compress_options(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_compress_result(
+    CompressResult self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_compress_result(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_safety_options(
+    SafetyOptions self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_safety_options(self, serializer);
   }
 
   @protected
@@ -757,6 +1228,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_f_32(double self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putFloat32(self);
+  }
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
@@ -811,6 +1288,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_compress_result(
+    CompressResult? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_compress_result(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -837,6 +1327,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_process_result(ProcessResult self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_safety_report(self.safety, serializer);
+    sse_encode_opt_box_autoadd_compress_result(self.image, serializer);
+  }
+
+  @protected
+  void sse_encode_safety_options(SafetyOptions self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_f_32(self.rejectThreshold, serializer);
+    sse_encode_f_32(self.reviewThreshold, serializer);
+    sse_encode_f_32(self.suggestiveWeight, serializer);
+    sse_encode_bool(self.compressUnsafe, serializer);
+  }
+
+  @protected
+  void sse_encode_safety_report(SafetyReport self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_verdict(self.verdict, serializer);
+    sse_encode_f_32(self.nsfwScore, serializer);
+    sse_encode_safety_scores(self.scores, serializer);
+    sse_encode_u_32(self.elapsedMs, serializer);
+  }
+
+  @protected
+  void sse_encode_safety_scores(SafetyScores self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_f_32(self.drawings, serializer);
+    sse_encode_f_32(self.hentai, serializer);
+    sse_encode_f_32(self.neutral, serializer);
+    sse_encode_f_32(self.porn, serializer);
+    sse_encode_f_32(self.sexy, serializer);
+  }
+
+  @protected
   void sse_encode_u_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint32(self);
@@ -851,5 +1376,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_unit(void self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  void sse_encode_verdict(Verdict self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
   }
 }

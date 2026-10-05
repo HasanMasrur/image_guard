@@ -1,4 +1,4 @@
-use crate::api::types::{CompressOptions, ErrorCode, ImageGuardError};
+use crate::api::types::{CompressOptions, ErrorCode, ImageGuardError, SafetyOptions};
 use crate::core::limits::*;
 
 fn invalid(message: String) -> ImageGuardError {
@@ -50,9 +50,75 @@ pub fn validate_options(o: &CompressOptions) -> Result<(), ImageGuardError> {
     Ok(())
 }
 
+pub fn validate_safety_options(o: &SafetyOptions) -> Result<(), ImageGuardError> {
+    for (name, v) in [
+        ("rejectThreshold", o.reject_threshold),
+        ("reviewThreshold", o.review_threshold),
+        ("suggestiveWeight", o.suggestive_weight),
+    ] {
+        if !(0.0..=1.0).contains(&v) {
+            return Err(invalid(format!(
+                "{name} must be between 0.0 and 1.0, got {v}"
+            )));
+        }
+    }
+    if o.review_threshold > o.reject_threshold {
+        return Err(invalid(format!(
+            "reviewThreshold ({}) must not be greater than rejectThreshold ({})",
+            o.review_threshold, o.reject_threshold
+        )));
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn safety_defaults_valid() {
+        assert!(validate_safety_options(&SafetyOptions::default()).is_ok());
+    }
+
+    #[test]
+    fn safety_ranges() {
+        let base = SafetyOptions::default();
+        for bad in [
+            SafetyOptions {
+                reject_threshold: 1.1,
+                ..base.clone()
+            },
+            SafetyOptions {
+                review_threshold: -0.1,
+                ..base.clone()
+            },
+            SafetyOptions {
+                suggestive_weight: 2.0,
+                ..base.clone()
+            },
+            SafetyOptions {
+                reject_threshold: f32::NAN,
+                ..base.clone()
+            },
+            SafetyOptions {
+                review_threshold: 0.8,
+                reject_threshold: 0.5,
+                ..base.clone()
+            },
+        ] {
+            assert_eq!(
+                validate_safety_options(&bad).unwrap_err().code,
+                ErrorCode::InvalidOptions,
+                "{bad:?}"
+            );
+        }
+        assert!(validate_safety_options(&SafetyOptions {
+            review_threshold: 0.5,
+            reject_threshold: 0.5,
+            ..base
+        })
+        .is_ok());
+    }
 
     fn err_code(o: CompressOptions) -> Option<ErrorCode> {
         validate_options(&o).err().map(|e| e.code)

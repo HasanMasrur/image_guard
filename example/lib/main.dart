@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:image_guard/image_guard.dart';
 import 'package:image_picker/image_picker.dart';
 
-void main() => runApp(const MaterialApp(home: DemoPage()));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Load the native library + NSFW model once at startup.
+  await SafeImage.initialize();
+  runApp(const MaterialApp(home: DemoPage()));
+}
 
 class DemoPage extends StatefulWidget {
   const DemoPage({super.key});
@@ -22,7 +27,7 @@ class _DemoPageState extends State<DemoPage> {
 
   XFile? _picked;
   Uint8List? _original;
-  SafeImageResult? _result;
+  SafeImageProcessResult? _result;
   String? _error;
   bool _busy = false;
 
@@ -30,7 +35,11 @@ class _DemoPageState extends State<DemoPage> {
       c.text.trim().isEmpty ? null : int.tryParse(c.text.trim());
 
   Future<void> _pick(ImageSource source) async {
-    final file = await ImagePicker().pickImage(source: source);
+    // imageQuality makes iOS return JPEG instead of HEIC (not supported yet).
+    final file = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 100,
+    );
     if (file == null) return;
     _picked = file;
     _original = await file.readAsBytes();
@@ -53,7 +62,7 @@ class _DemoPageState extends State<DemoPage> {
         format: _format,
         keepOriginalIfFits: _keepOriginal,
       );
-      final r = await SafeImage.compress(
+      final r = await SafeImage.process(
         SafeImageSource.file(file.path),
         options: options,
       );
@@ -133,25 +142,30 @@ class _DemoPageState extends State<DemoPage> {
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           if (r != null) ...[
-            Text(
-              'Before: ${r.originalWidth}×${r.originalHeight} '
-              '${r.originalFormat.name}, ${(r.originalSizeBytes / 1024).toStringAsFixed(1)} KB\n'
-              'After:  ${r.width}×${r.height} ${r.format.name}, '
-              '${r.sizeKb.toStringAsFixed(1)} KB'
-              '${r.quality != null ? ', quality ${r.quality}' : ''}\n'
-              '${r.keptOriginal ? 'Original kept (already fits)' : '${r.attempts} encode attempts'}'
-              ' · ${r.elapsed.inMilliseconds} ms',
-            ),
+            _VerdictCard(report: r.safety),
             const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_original != null)
-                  Expanded(child: _preview('Original', _original!)),
-                const SizedBox(width: 8),
-                Expanded(child: _preview('Result', r.bytes)),
-              ],
-            ),
+            if (r.image case final img?) ...[
+              Text(
+                'Before: ${img.originalWidth}×${img.originalHeight} '
+                '${img.originalFormat.name}, ${(img.originalSizeBytes / 1024).toStringAsFixed(1)} KB\n'
+                'After:  ${img.width}×${img.height} ${img.format.name}, '
+                '${img.sizeKb.toStringAsFixed(1)} KB'
+                '${img.quality != null ? ', quality ${img.quality}' : ''}\n'
+                '${img.keptOriginal ? 'Original kept (already fits)' : '${img.attempts} encode attempts'}'
+                ' · ${img.elapsed.inMilliseconds} ms',
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_original != null)
+                    Expanded(child: _preview('Original', _original!)),
+                  const SizedBox(width: 8),
+                  Expanded(child: _preview('Result', img.bytes)),
+                ],
+              ),
+            ] else
+              const Text('Rejected: the image was not compressed or shown.'),
           ],
         ],
       ),
@@ -174,4 +188,53 @@ class _DemoPageState extends State<DemoPage> {
       Image.memory(bytes, fit: BoxFit.contain),
     ],
   );
+}
+
+class _VerdictCard extends StatelessWidget {
+  const _VerdictCard({required this.report});
+
+  final SafetyReport report;
+
+  @override
+  Widget build(BuildContext context) {
+    final (color, label) = switch (report.verdict) {
+      Verdict.safe => (Colors.green, 'SAFE – can be uploaded'),
+      Verdict.uncertain => (Colors.orange, 'UNCERTAIN – needs review'),
+      Verdict.unsafe => (Colors.red, '18+ / UNSAFE – rejected'),
+    };
+    return Card(
+      color: color.withValues(alpha: 0.12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'NSFW score ${(report.nsfwScore * 100).toStringAsFixed(1)} % '
+              '· ${report.elapsed.inMilliseconds} ms',
+            ),
+            const SizedBox(height: 8),
+            for (final e in report.scores.toMap().entries)
+              Row(
+                children: [
+                  SizedBox(width: 72, child: Text(e.key)),
+                  Expanded(child: LinearProgressIndicator(value: e.value)),
+                  SizedBox(
+                    width: 56,
+                    child: Text(
+                      '${(e.value * 100).toStringAsFixed(1)}%',
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }

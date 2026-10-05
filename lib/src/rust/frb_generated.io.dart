@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/compress.dart';
+import 'api/safety.dart';
 import 'api/types.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -29,6 +30,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CompressOptions dco_decode_box_autoadd_compress_options(dynamic raw);
 
   @protected
+  CompressResult dco_decode_box_autoadd_compress_result(dynamic raw);
+
+  @protected
+  SafetyOptions dco_decode_box_autoadd_safety_options(dynamic raw);
+
+  @protected
   int dco_decode_box_autoadd_u_32(dynamic raw);
 
   @protected
@@ -42,6 +49,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ErrorCode dco_decode_error_code(dynamic raw);
+
+  @protected
+  double dco_decode_f_32(dynamic raw);
 
   @protected
   int dco_decode_i_32(dynamic raw);
@@ -62,6 +72,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  CompressResult? dco_decode_opt_box_autoadd_compress_result(dynamic raw);
+
+  @protected
   int? dco_decode_opt_box_autoadd_u_32(dynamic raw);
 
   @protected
@@ -69,6 +82,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   OutputFormat dco_decode_output_format(dynamic raw);
+
+  @protected
+  ProcessResult dco_decode_process_result(dynamic raw);
+
+  @protected
+  SafetyOptions dco_decode_safety_options(dynamic raw);
+
+  @protected
+  SafetyReport dco_decode_safety_report(dynamic raw);
+
+  @protected
+  SafetyScores dco_decode_safety_scores(dynamic raw);
 
   @protected
   int dco_decode_u_32(dynamic raw);
@@ -80,6 +105,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void dco_decode_unit(dynamic raw);
 
   @protected
+  Verdict dco_decode_verdict(dynamic raw);
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
@@ -87,6 +115,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   CompressOptions sse_decode_box_autoadd_compress_options(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  CompressResult sse_decode_box_autoadd_compress_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  SafetyOptions sse_decode_box_autoadd_safety_options(
     SseDeserializer deserializer,
   );
 
@@ -104,6 +142,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ErrorCode sse_decode_error_code(SseDeserializer deserializer);
+
+  @protected
+  double sse_decode_f_32(SseDeserializer deserializer);
 
   @protected
   int sse_decode_i_32(SseDeserializer deserializer);
@@ -124,6 +165,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  CompressResult? sse_decode_opt_box_autoadd_compress_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
 
   @protected
@@ -131,6 +177,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   OutputFormat sse_decode_output_format(SseDeserializer deserializer);
+
+  @protected
+  ProcessResult sse_decode_process_result(SseDeserializer deserializer);
+
+  @protected
+  SafetyOptions sse_decode_safety_options(SseDeserializer deserializer);
+
+  @protected
+  SafetyReport sse_decode_safety_report(SseDeserializer deserializer);
+
+  @protected
+  SafetyScores sse_decode_safety_scores(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -142,6 +200,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_decode_unit(SseDeserializer deserializer);
 
   @protected
+  Verdict sse_decode_verdict(SseDeserializer deserializer);
+
+  @protected
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
@@ -150,6 +211,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_compress_options(
     CompressOptions self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_compress_result(
+    CompressResult self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_safety_options(
+    SafetyOptions self,
     SseSerializer serializer,
   );
 
@@ -173,6 +246,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_error_code(ErrorCode self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_f_32(double self, SseSerializer serializer);
 
   @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
@@ -199,6 +275,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_compress_result(
+    CompressResult? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
 
   @protected
@@ -208,6 +290,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_output_format(OutputFormat self, SseSerializer serializer);
 
   @protected
+  void sse_encode_process_result(ProcessResult self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_safety_options(SafetyOptions self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_safety_report(SafetyReport self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_safety_scores(SafetyScores self, SseSerializer serializer);
+
+  @protected
   void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
@@ -215,6 +309,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_verdict(Verdict self, SseSerializer serializer);
 }
 
 // Section: wire_class

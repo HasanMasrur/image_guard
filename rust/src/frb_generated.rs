@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -940318354;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 2034610273;
 
 // Section: executor
 
@@ -47,6 +47,74 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__safety__classify_bytes_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "classify_bytes",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_bytes = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_safety = <crate::api::types::SafetyOptions>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::types::ImageGuardError>((move || {
+                    let output_ok = crate::api::safety::classify_bytes(api_bytes, api_safety)?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__safety__classify_file_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "classify_file",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_path = <String>::sse_decode(&mut deserializer);
+            let api_safety = <crate::api::types::SafetyOptions>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::types::ImageGuardError>((move || {
+                    let output_ok = crate::api::safety::classify_file(api_path, api_safety)?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
 fn wire__crate__api__compress__compress_bytes_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -247,6 +315,203 @@ fn wire__crate__api__compress__init_app_impl(
         },
     )
 }
+fn wire__crate__api__safety__is_model_loaded_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "is_model_loaded",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Ok::<_, ()>(crate::api::safety::is_model_loaded())?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__safety__load_model_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "load_model",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_model = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::types::ImageGuardError>((move || {
+                    let output_ok = crate::api::safety::load_model(api_model)?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__safety__process_bytes_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "process_bytes",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_bytes = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_options = <crate::api::types::CompressOptions>::sse_decode(&mut deserializer);
+            let api_safety = <crate::api::types::SafetyOptions>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::types::ImageGuardError>((move || {
+                    let output_ok =
+                        crate::api::safety::process_bytes(api_bytes, api_options, api_safety)?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__safety__process_file_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "process_file",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_path = <String>::sse_decode(&mut deserializer);
+            let api_options = <crate::api::types::CompressOptions>::sse_decode(&mut deserializer);
+            let api_safety = <crate::api::types::SafetyOptions>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::types::ImageGuardError>((move || {
+                    let output_ok =
+                        crate::api::safety::process_file(api_path, api_options, api_safety)?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__types__safety_options_default_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "safety_options_default",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Ok::<_, ()>(crate::api::types::SafetyOptions::default())?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__safety__unload_model_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "unload_model",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Ok::<_, ()>({
+                    crate::api::safety::unload_model();
+                })?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__compress__validate_compress_options_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -370,9 +635,18 @@ impl SseDecode for crate::api::types::ErrorCode {
             7 => crate::api::types::ErrorCode::ImageTooLarge,
             8 => crate::api::types::ErrorCode::CannotMeetTarget,
             9 => crate::api::types::ErrorCode::EncodingFailed,
-            10 => crate::api::types::ErrorCode::Internal,
+            10 => crate::api::types::ErrorCode::ModelNotLoaded,
+            11 => crate::api::types::ErrorCode::ModelLoadFailed,
+            12 => crate::api::types::ErrorCode::Internal,
             _ => unreachable!("Invalid variant for ErrorCode: {}", inner),
         };
+    }
+}
+
+impl SseDecode for f32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_f32::<NativeEndian>().unwrap()
     }
 }
 
@@ -440,6 +714,19 @@ impl SseDecode for Vec<u8> {
     }
 }
 
+impl SseDecode for Option<crate::api::types::CompressResult> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::types::CompressResult>::sse_decode(
+                deserializer,
+            ));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<u32> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -474,6 +761,68 @@ impl SseDecode for crate::api::types::OutputFormat {
     }
 }
 
+impl SseDecode for crate::api::types::ProcessResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_safety = <crate::api::types::SafetyReport>::sse_decode(deserializer);
+        let mut var_image = <Option<crate::api::types::CompressResult>>::sse_decode(deserializer);
+        return crate::api::types::ProcessResult {
+            safety: var_safety,
+            image: var_image,
+        };
+    }
+}
+
+impl SseDecode for crate::api::types::SafetyOptions {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_rejectThreshold = <f32>::sse_decode(deserializer);
+        let mut var_reviewThreshold = <f32>::sse_decode(deserializer);
+        let mut var_suggestiveWeight = <f32>::sse_decode(deserializer);
+        let mut var_compressUnsafe = <bool>::sse_decode(deserializer);
+        return crate::api::types::SafetyOptions {
+            reject_threshold: var_rejectThreshold,
+            review_threshold: var_reviewThreshold,
+            suggestive_weight: var_suggestiveWeight,
+            compress_unsafe: var_compressUnsafe,
+        };
+    }
+}
+
+impl SseDecode for crate::api::types::SafetyReport {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_verdict = <crate::api::types::Verdict>::sse_decode(deserializer);
+        let mut var_nsfwScore = <f32>::sse_decode(deserializer);
+        let mut var_scores = <crate::api::types::SafetyScores>::sse_decode(deserializer);
+        let mut var_elapsedMs = <u32>::sse_decode(deserializer);
+        return crate::api::types::SafetyReport {
+            verdict: var_verdict,
+            nsfw_score: var_nsfwScore,
+            scores: var_scores,
+            elapsed_ms: var_elapsedMs,
+        };
+    }
+}
+
+impl SseDecode for crate::api::types::SafetyScores {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_drawings = <f32>::sse_decode(deserializer);
+        let mut var_hentai = <f32>::sse_decode(deserializer);
+        let mut var_neutral = <f32>::sse_decode(deserializer);
+        let mut var_porn = <f32>::sse_decode(deserializer);
+        let mut var_sexy = <f32>::sse_decode(deserializer);
+        return crate::api::types::SafetyScores {
+            drawings: var_drawings,
+            hentai: var_hentai,
+            neutral: var_neutral,
+            porn: var_porn,
+            sexy: var_sexy,
+        };
+    }
+}
+
 impl SseDecode for u32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -493,6 +842,19 @@ impl SseDecode for () {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {}
 }
 
+impl SseDecode for crate::api::types::Verdict {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::types::Verdict::Safe,
+            1 => crate::api::types::Verdict::Uncertain,
+            2 => crate::api::types::Verdict::Unsafe,
+            _ => unreachable!("Invalid variant for Verdict: {}", inner),
+        };
+    }
+}
+
 fn pde_ffi_dispatcher_primary_impl(
     func_id: i32,
     port: flutter_rust_bridge::for_generated::MessagePort,
@@ -502,17 +864,25 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__compress__compress_bytes_impl(port, ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__compress__compress_file_impl(port, ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__types__compress_options_default_impl(
+        1 => wire__crate__api__safety__classify_bytes_impl(port, ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__safety__classify_file_impl(port, ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__compress__compress_bytes_impl(port, ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__compress__compress_file_impl(port, ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__types__compress_options_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        4 => wire__crate__api__compress__image_info_bytes_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__compress__image_info_file_impl(port, ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__compress__init_app_impl(port, ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__compress__image_info_bytes_impl(port, ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__compress__image_info_file_impl(port, ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__compress__init_app_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__safety__load_model_impl(port, ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__safety__process_bytes_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__safety__process_file_impl(port, ptr, rust_vec_len, data_len),
+        13 => {
+            wire__crate__api__types__safety_options_default_impl(port, ptr, rust_vec_len, data_len)
+        }
         _ => unreachable!(),
     }
 }
@@ -525,7 +895,9 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        7 => {
+        9 => wire__crate__api__safety__is_model_loaded_impl(ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__safety__unload_model_impl(ptr, rust_vec_len, data_len),
+        15 => {
             wire__crate__api__compress__validate_compress_options_impl(ptr, rust_vec_len, data_len)
         }
         _ => unreachable!(),
@@ -608,7 +980,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::types::ErrorCode {
             Self::ImageTooLarge => 7.into_dart(),
             Self::CannotMeetTarget => 8.into_dart(),
             Self::EncodingFailed => 9.into_dart(),
-            Self::Internal => 10.into_dart(),
+            Self::ModelNotLoaded => 10.into_dart(),
+            Self::ModelLoadFailed => 11.into_dart(),
+            Self::Internal => 12.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -708,6 +1082,114 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::types::OutputFormat>
         self
     }
 }
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::ProcessResult {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.safety.into_into_dart().into_dart(),
+            self.image.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::types::ProcessResult
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::ProcessResult>
+    for crate::api::types::ProcessResult
+{
+    fn into_into_dart(self) -> crate::api::types::ProcessResult {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::SafetyOptions {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.reject_threshold.into_into_dart().into_dart(),
+            self.review_threshold.into_into_dart().into_dart(),
+            self.suggestive_weight.into_into_dart().into_dart(),
+            self.compress_unsafe.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::types::SafetyOptions
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::SafetyOptions>
+    for crate::api::types::SafetyOptions
+{
+    fn into_into_dart(self) -> crate::api::types::SafetyOptions {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::SafetyReport {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.verdict.into_into_dart().into_dart(),
+            self.nsfw_score.into_into_dart().into_dart(),
+            self.scores.into_into_dart().into_dart(),
+            self.elapsed_ms.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::types::SafetyReport
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::SafetyReport>
+    for crate::api::types::SafetyReport
+{
+    fn into_into_dart(self) -> crate::api::types::SafetyReport {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::SafetyScores {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.drawings.into_into_dart().into_dart(),
+            self.hentai.into_into_dart().into_dart(),
+            self.neutral.into_into_dart().into_dart(),
+            self.porn.into_into_dart().into_dart(),
+            self.sexy.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::types::SafetyScores
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::SafetyScores>
+    for crate::api::types::SafetyScores
+{
+    fn into_into_dart(self) -> crate::api::types::SafetyScores {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::types::Verdict {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Safe => 0.into_dart(),
+            Self::Uncertain => 1.into_dart(),
+            Self::Unsafe => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::types::Verdict {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::types::Verdict> for crate::api::types::Verdict {
+    fn into_into_dart(self) -> crate::api::types::Verdict {
+        self
+    }
+}
 
 impl SseEncode for String {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -772,13 +1254,22 @@ impl SseEncode for crate::api::types::ErrorCode {
                 crate::api::types::ErrorCode::ImageTooLarge => 7,
                 crate::api::types::ErrorCode::CannotMeetTarget => 8,
                 crate::api::types::ErrorCode::EncodingFailed => 9,
-                crate::api::types::ErrorCode::Internal => 10,
+                crate::api::types::ErrorCode::ModelNotLoaded => 10,
+                crate::api::types::ErrorCode::ModelLoadFailed => 11,
+                crate::api::types::ErrorCode::Internal => 12,
                 _ => {
                     unimplemented!("");
                 }
             },
             serializer,
         );
+    }
+}
+
+impl SseEncode for f32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_f32::<NativeEndian>(self).unwrap();
     }
 }
 
@@ -837,6 +1328,16 @@ impl SseEncode for Vec<u8> {
     }
 }
 
+impl SseEncode for Option<crate::api::types::CompressResult> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::types::CompressResult>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<u32> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -873,6 +1374,45 @@ impl SseEncode for crate::api::types::OutputFormat {
     }
 }
 
+impl SseEncode for crate::api::types::ProcessResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::types::SafetyReport>::sse_encode(self.safety, serializer);
+        <Option<crate::api::types::CompressResult>>::sse_encode(self.image, serializer);
+    }
+}
+
+impl SseEncode for crate::api::types::SafetyOptions {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <f32>::sse_encode(self.reject_threshold, serializer);
+        <f32>::sse_encode(self.review_threshold, serializer);
+        <f32>::sse_encode(self.suggestive_weight, serializer);
+        <bool>::sse_encode(self.compress_unsafe, serializer);
+    }
+}
+
+impl SseEncode for crate::api::types::SafetyReport {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::types::Verdict>::sse_encode(self.verdict, serializer);
+        <f32>::sse_encode(self.nsfw_score, serializer);
+        <crate::api::types::SafetyScores>::sse_encode(self.scores, serializer);
+        <u32>::sse_encode(self.elapsed_ms, serializer);
+    }
+}
+
+impl SseEncode for crate::api::types::SafetyScores {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <f32>::sse_encode(self.drawings, serializer);
+        <f32>::sse_encode(self.hentai, serializer);
+        <f32>::sse_encode(self.neutral, serializer);
+        <f32>::sse_encode(self.porn, serializer);
+        <f32>::sse_encode(self.sexy, serializer);
+    }
+}
+
 impl SseEncode for u32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -890,6 +1430,23 @@ impl SseEncode for u8 {
 impl SseEncode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {}
+}
+
+impl SseEncode for crate::api::types::Verdict {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::types::Verdict::Safe => 0,
+                crate::api::types::Verdict::Uncertain => 1,
+                crate::api::types::Verdict::Unsafe => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
 }
 
 #[cfg(not(target_family = "wasm"))]

@@ -93,6 +93,64 @@ pub struct ImageInfo {
     pub has_orientation: bool,
 }
 
+/// How the NSFW scores are turned into a decision.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SafetyOptions {
+    /// `nsfw_score >= reject_threshold` → [`Verdict::Unsafe`]. Range 0–1.
+    pub reject_threshold: f32,
+    /// `nsfw_score >= review_threshold` → [`Verdict::Uncertain`]. Range 0–1, ≤ reject.
+    pub review_threshold: f32,
+    /// How much the `sexy` (suggestive) class counts towards `nsfw_score`. Range 0–1.
+    pub suggestive_weight: f32,
+    /// Also compress images judged unsafe (normally skipped to save time).
+    pub compress_unsafe: bool,
+}
+
+impl Default for SafetyOptions {
+    fn default() -> Self {
+        Self {
+            reject_threshold: 0.7,
+            review_threshold: 0.3,
+            suggestive_weight: 0.5,
+            compress_unsafe: false,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Verdict {
+    Safe,
+    /// Between the review and reject thresholds: the app decides.
+    Uncertain,
+    Unsafe,
+}
+
+/// Raw model probabilities (they sum to ~1).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SafetyScores {
+    pub drawings: f32,
+    pub hentai: f32,
+    pub neutral: f32,
+    pub porn: f32,
+    pub sexy: f32,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SafetyReport {
+    pub verdict: Verdict,
+    /// `porn + hentai + sexy × suggestive_weight`, clamped to 0–1.
+    pub nsfw_score: f32,
+    pub scores: SafetyScores,
+    pub elapsed_ms: u32,
+}
+
+#[derive(Debug, Clone)]
+pub struct ProcessResult {
+    pub safety: SafetyReport,
+    /// `None` when the image was unsafe and `compress_unsafe` is false.
+    pub image: Option<CompressResult>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorCode {
     InvalidOptions,
@@ -105,6 +163,10 @@ pub enum ErrorCode {
     ImageTooLarge,
     CannotMeetTarget,
     EncodingFailed,
+    /// `classify`/`process` was called before the NSFW model was loaded.
+    ModelNotLoaded,
+    /// The model bytes are not a valid ONNX model of the expected shape.
+    ModelLoadFailed,
     Internal,
 }
 

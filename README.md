@@ -1,55 +1,99 @@
 # image_guard
 
-On-device image compression for Flutter with a **hard byte limit** and **resolution limit**, powered by a Rust core (via `flutter_rust_bridge`).
+On-device **NSFW (18+) image detection** and **compression to an exact byte limit and resolution** for Flutter, powered by a Rust core (via `flutter_rust_bridge`).
 
-> Status: `0.1.0-dev` — compression engine done. On-device NSFW detection is the next milestone.
+The AI check runs on the device. Images are never uploaded anywhere to be checked.
 
 ## Features
 
-- **Exact size limit** — output is always `<= maxBytes`, or a clear `cannotMeetTarget` error. It never quietly returns a file that is too big.
-- **Resolution limit** — `maxWidth` / `maxHeight`. The aspect ratio is kept and images are never upscaled.
-- **Never makes small images worse** — a 100 KB photo with a 500 KB limit comes back unchanged.
-- Picks the **highest quality that fits**: binary search on JPEG quality first, then the resolution is reduced only if needed.
+### NSFW detection
+- On-device MobileNetV2 classifier ([GantMan/nsfw_model](https://github.com/GantMan/nsfw_model), MIT). It runs with [tract](https://github.com/sonos/tract), a pure-Rust inference engine, so no TensorFlow/ONNX Runtime binaries are added to your app.
+- Five classes: `drawings`, `hentai`, `neutral`, `porn`, `sexy`.
+- Verdict: `safe` / `uncertain` / `unsafe`, with thresholds you can configure.
+- The check runs on the full-quality image **before** compression. Unsafe images are not compressed.
+
+### Compression
+- **Exact size limit**: output is always `<= maxBytes`, or a clear `cannotMeetTarget` error. It never quietly returns a file that is too big.
+- **Resolution limit**: `maxWidth` / `maxHeight`. The aspect ratio is kept and images are never upscaled.
+- **Never makes small images worse**: a 100 KB photo with a 500 KB limit comes back unchanged.
+- Picks the **highest quality that fits**. Resolution is reduced only if needed.
 - Fixes **EXIF rotation** and strips **EXIF/GPS** metadata.
 - Reads JPEG, PNG, WebP, GIF and BMP, and writes JPEG or PNG.
 - Rejects broken, oversized (> 100 MP) and malicious input without crashing.
-- Runs on a Rust worker thread, so the UI isolate is never blocked.
 
 ## Usage
 
 ```dart
 import 'package:image_guard/image_guard.dart';
 
-final result = await SafeImage.compress(
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SafeImage.initialize(); // optional: loads the model up front (~0.2 s)
+  runApp(const MyApp());
+}
+
+final result = await SafeImage.process(
   SafeImageSource.file(xfile.path),
   options: SafeImageOptions(
-    maxBytes: 50.kb,      // user-chosen size
-    maxWidth: 1080,       // user-chosen resolution (optional)
+    maxBytes: 50.kb,   // user-chosen size
+    maxWidth: 1080,    // user-chosen resolution (optional)
     maxHeight: 1080,
   ),
 );
 
-await api.upload(result.bytes);   // guaranteed <= 50 KB
-print(result);                    // 1080x810 jpeg, 48.7 KB, quality: 72 ...
+switch (result.verdict) {
+  case Verdict.unsafe:
+    showError('18+ content is not allowed'); // result.image is null
+  case Verdict.uncertain:
+    // Your policy: reject, or send to manual review.
+    // (A case must not be empty: in Dart an empty case falls through to the next one.)
+    showError('This photo needs review');
+  case Verdict.safe:
+    await api.upload(result.image!.bytes);   // guaranteed <= 50 KB
+}
+
+print(result.safety); // SafetyReport(safe, nsfwScore: 0.012, porn: 0.004, ...)
 ```
+
+Other calls:
+
+```dart
+final report = await SafeImage.classify(source);   // NSFW check only
+final small  = await SafeImage.compress(source);   // compression only (no NSFW check!)
+await SafeImage.dispose();                         // free model memory
+```
+
+### Safety options
+
+| Option | Default | Meaning |
+|---|---|---|
+| `rejectThreshold` | `0.7` | `nsfwScore >= this` → `unsafe` |
+| `reviewThreshold` | `0.3` | `nsfwScore >= this` → `uncertain` |
+| `suggestiveWeight` | `0.5` | How much `sexy` (swimwear, lingerie) counts. `0` = ignore, `1` = same as explicit |
+| `compressUnsafe` | `false` | Also compress unsafe images |
+
+`nsfwScore = porn + hentai + sexy × suggestiveWeight`. `SafetyOptions.strict` is a stricter preset.
+
+> **Accuracy:** about 92 % validation accuracy on the upstream dataset. Like every classifier it makes mistakes (false positives and false negatives). For user-generated content, combine it with server-side moderation and/or reporting. This is **not** a CSAM detection tool.
 
 ### Errors
 
 ```dart
 try {
-  await SafeImage.compress(source, options: options);
+  await SafeImage.process(source, options: options);
 } on SafeImageException catch (e) {
   switch (e.code) {
-    case SafeImageErrorCode.invalidOptions:   // bad maxBytes / quality / size
+    case SafeImageErrorCode.invalidOptions:   // bad maxBytes / quality / thresholds
     case SafeImageErrorCode.unsupportedFormat: // e.g. HEIC, PDF
     case SafeImageErrorCode.corruptImage:
     case SafeImageErrorCode.cannotMeetTarget:  // limit too small for minDimension/minQuality
+    case SafeImageErrorCode.modelLoadFailed:
     default:
   }
 }
 ```
 
-### Options
+### Compression options
 
 | Option | Default | Allowed |
 |---|---|---|
@@ -64,6 +108,10 @@ try {
 ## HEIC on iPhone
 
 HEIC is not decoded yet. When you use `image_picker`, pass `imageQuality` (or `maxWidth`). iOS then converts the photo to JPEG before returning it.
+
+## Model & license
+
+The bundled model `assets/models/nsfw_mobilenet_v2_140_224.nnef.tar` is converted from [GantMan/nsfw_model](https://github.com/GantMan/nsfw_model) release 1.2.0 (MIT License, Copyright (c) 2020 The nsfw_model Developers). See `NOTICE` and `tool/convert_model.py`.
 
 ## Platform support & requirements
 

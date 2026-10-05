@@ -25,6 +25,12 @@ enum SafeImageErrorCode {
   /// Even at `minQuality` and `minDimension` the output is bigger than `maxBytes`.
   cannotMeetTarget,
   encodingFailed,
+
+  /// The NSFW model could not be loaded (missing asset or invalid file).
+  modelLoadFailed,
+
+  /// The NSFW model was unloaded with [SafeImage.dispose] and not reloaded.
+  modelNotLoaded,
   internal,
 }
 

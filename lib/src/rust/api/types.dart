@@ -7,7 +7,7 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `new`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 
 /// Everything the caller can tune. All values are validated by
 /// [`crate::core::validate::validate_options`] before any work is done.
@@ -168,6 +168,12 @@ enum ErrorCode {
   imageTooLarge,
   cannotMeetTarget,
   encodingFailed,
+
+  /// `classify`/`process` was called before the NSFW model was loaded.
+  modelNotLoaded,
+
+  /// The model bytes are not a valid ONNX model of the expected shape.
+  modelLoadFailed,
   internal,
 }
 
@@ -238,4 +244,143 @@ enum OutputFormat {
 
   /// Lossless. Size is controlled by resolution only (quality is ignored).
   png,
+}
+
+class ProcessResult {
+  final SafetyReport safety;
+
+  /// `None` when the image was unsafe and `compress_unsafe` is false.
+  final CompressResult? image;
+
+  const ProcessResult({required this.safety, this.image});
+
+  @override
+  int get hashCode => safety.hashCode ^ image.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProcessResult &&
+          runtimeType == other.runtimeType &&
+          safety == other.safety &&
+          image == other.image;
+}
+
+/// How the NSFW scores are turned into a decision.
+class SafetyOptions {
+  /// `nsfw_score >= reject_threshold` → [`Verdict::Unsafe`]. Range 0–1.
+  final double rejectThreshold;
+
+  /// `nsfw_score >= review_threshold` → [`Verdict::Uncertain`]. Range 0–1, ≤ reject.
+  final double reviewThreshold;
+
+  /// How much the `sexy` (suggestive) class counts towards `nsfw_score`. Range 0–1.
+  final double suggestiveWeight;
+
+  /// Also compress images judged unsafe (normally skipped to save time).
+  final bool compressUnsafe;
+
+  const SafetyOptions({
+    required this.rejectThreshold,
+    required this.reviewThreshold,
+    required this.suggestiveWeight,
+    required this.compressUnsafe,
+  });
+
+  static Future<SafetyOptions> default_() =>
+      RustLib.instance.api.crateApiTypesSafetyOptionsDefault();
+
+  @override
+  int get hashCode =>
+      rejectThreshold.hashCode ^
+      reviewThreshold.hashCode ^
+      suggestiveWeight.hashCode ^
+      compressUnsafe.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SafetyOptions &&
+          runtimeType == other.runtimeType &&
+          rejectThreshold == other.rejectThreshold &&
+          reviewThreshold == other.reviewThreshold &&
+          suggestiveWeight == other.suggestiveWeight &&
+          compressUnsafe == other.compressUnsafe;
+}
+
+class SafetyReport {
+  final Verdict verdict;
+
+  /// `porn + hentai + sexy × suggestive_weight`, clamped to 0–1.
+  final double nsfwScore;
+  final SafetyScores scores;
+  final int elapsedMs;
+
+  const SafetyReport({
+    required this.verdict,
+    required this.nsfwScore,
+    required this.scores,
+    required this.elapsedMs,
+  });
+
+  @override
+  int get hashCode =>
+      verdict.hashCode ^
+      nsfwScore.hashCode ^
+      scores.hashCode ^
+      elapsedMs.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SafetyReport &&
+          runtimeType == other.runtimeType &&
+          verdict == other.verdict &&
+          nsfwScore == other.nsfwScore &&
+          scores == other.scores &&
+          elapsedMs == other.elapsedMs;
+}
+
+/// Raw model probabilities (they sum to ~1).
+class SafetyScores {
+  final double drawings;
+  final double hentai;
+  final double neutral;
+  final double porn;
+  final double sexy;
+
+  const SafetyScores({
+    required this.drawings,
+    required this.hentai,
+    required this.neutral,
+    required this.porn,
+    required this.sexy,
+  });
+
+  @override
+  int get hashCode =>
+      drawings.hashCode ^
+      hentai.hashCode ^
+      neutral.hashCode ^
+      porn.hashCode ^
+      sexy.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SafetyScores &&
+          runtimeType == other.runtimeType &&
+          drawings == other.drawings &&
+          hentai == other.hentai &&
+          neutral == other.neutral &&
+          porn == other.porn &&
+          sexy == other.sexy;
+}
+
+enum Verdict {
+  safe,
+
+  /// Between the review and reject thresholds: the app decides.
+  uncertain,
+  unsafe,
 }

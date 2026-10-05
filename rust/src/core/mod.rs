@@ -1,8 +1,10 @@
+pub mod classifier;
 pub mod decode;
 pub mod encode;
 pub mod io;
 pub mod limits;
 pub mod metadata;
+pub mod model_store;
 pub mod pipeline;
 pub mod resize;
 pub mod target;

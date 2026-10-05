@@ -4,8 +4,9 @@ use std::time::Instant;
 
 use crate::api::types::{
     CompressOptions, CompressResult, ImageGuardError, ImageInfo, InputFormat, OutputFormat,
+    ProcessResult, SafetyOptions, SafetyReport, Verdict,
 };
-use crate::core::{decode, metadata, resize, target, validate};
+use crate::core::{decode, metadata, model_store, resize, target, validate};
 use image::metadata::Orientation;
 
 pub fn compress(
@@ -17,6 +18,46 @@ pub fn compress(
     // Always decode fully: this proves the file is a real, intact image
     // before anything is handed back to the app (or uploaded).
     let decoded = decode::decode(bytes)?;
+    compress_decoded(bytes, decoded, options, started)
+}
+
+/// AI check first (on the full-quality pixels), then compression.
+/// The image is decoded only once.
+pub fn process(
+    bytes: &[u8],
+    options: &CompressOptions,
+    safety: &SafetyOptions,
+) -> Result<ProcessResult, ImageGuardError> {
+    let started = Instant::now();
+    validate::validate_options(options)?;
+    validate::validate_safety_options(safety)?;
+    let model = model_store::get()?;
+    let decoded = decode::decode(bytes)?;
+    let report = model.classify(&decoded.image, safety)?;
+    let image = if report.verdict != Verdict::Unsafe || safety.compress_unsafe {
+        Some(compress_decoded(bytes, decoded, options, started)?)
+    } else {
+        None
+    };
+    Ok(ProcessResult {
+        safety: report,
+        image,
+    })
+}
+
+pub fn classify(bytes: &[u8], safety: &SafetyOptions) -> Result<SafetyReport, ImageGuardError> {
+    validate::validate_safety_options(safety)?;
+    let model = model_store::get()?;
+    let decoded = decode::decode(bytes)?;
+    model.classify(&decoded.image, safety)
+}
+
+fn compress_decoded(
+    bytes: &[u8],
+    decoded: decode::Decoded,
+    options: &CompressOptions,
+    started: Instant,
+) -> Result<CompressResult, ImageGuardError> {
     let (ow, oh) = (decoded.image.width(), decoded.image.height());
     let original_size = bytes.len() as u32; // ≤ MAX_INPUT_BYTES, checked by decode
 

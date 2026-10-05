@@ -38,3 +38,6 @@ migrate_working_dir/
 # Local IDE / OS
 .fvmrc
 .vscode/
+
+# Model conversion intermediates
+/tool/build/
