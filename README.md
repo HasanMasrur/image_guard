@@ -65,9 +65,38 @@ try {
 
 HEIC is not decoded yet. When you use `image_picker`, pass `imageQuality` (or `maxWidth`). iOS then converts the photo to JPEG before returning it.
 
-## Platform support
+## Platform support & requirements
 
-Android (arm64, armv7, x86_64) and iOS 15+, plus macOS for development. Building currently needs a Rust toolchain. Precompiled binaries are planned.
+| Platform | Minimum |
+|---|---|
+| Android | arm64-v8a, armeabi-v7a, x86_64, x86 |
+| iOS | 13.0 (15.0 with Xcode 27+) |
+| macOS | 10.15 (for development) |
+
+**Rust toolchain required (for now).** The native library is compiled while your app builds:
+
+1. Install Rust: https://rustup.rs
+2. Android: the Android NDK (Android Studio → SDK Manager → NDK).
+3. iOS: Xcode.
+
+The first build compiles Rust and takes a few minutes. Later builds are cached. Precompiled binaries are planned, and then Rust will no longer be needed.
+
+**Xcode 27+:** Xcode 27 no longer builds for iOS 13. Set iOS 15 in `ios/Podfile`:
+
+```ruby
+platform :ios, '15.0'
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+    end
+  end
+end
+```
+
+Also set **iOS Deployment Target = 15.0** for the Runner target in Xcode.
 
 ## Development
 
