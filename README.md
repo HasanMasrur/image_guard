@@ -67,7 +67,7 @@ await SafeImage.dispose();                         // free model memory
 
 The model (~18 MB) is **not bundled** in your app, so it does not add to the
 install size. On first use it is downloaded from this package's
-[GitHub release](https://github.com/HasanMasrur/image_guard/releases/tag/model-v1),
+[GitHub repo](https://github.com/HasanMasrur/image_guard/tree/model-v1/assets/models),
 checked with SHA-256, and cached. Later launches load it from disk, offline.
 
 Download it early (e.g. after login) and show progress:

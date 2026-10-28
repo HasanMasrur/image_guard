@@ -1,7 +1,7 @@
 ## 0.1.0-dev.3
 
 * **The NSFW model is no longer bundled** (−18 MB app size). It is downloaded on
-  first use from the GitHub release, verified with SHA-256 and cached.
+  first use from this package's GitHub repo, verified with SHA-256 and cached.
 * New `SafeImage.downloadModel(onProgress:)`, `isModelDownloaded()`,
   `deleteDownloadedModel()` and `SafeImage.model` (`SafeImageModel`) to self-host.
 * `SafeImage.initialize(modelBytes:)` is now public, to ship the model yourself.

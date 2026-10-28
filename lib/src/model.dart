@@ -30,12 +30,13 @@ class SafeImageModel {
     this.directory,
   });
 
-  /// GantMan nsfw_model 1.2.0 (MIT), converted to NNEF, hosted on this
-  /// package's GitHub release.
+  /// GantMan nsfw_model 1.2.0 (MIT), converted to NNEF, served from this
+  /// package's GitHub repo at the `model-v1` tag (never moved; a new model
+  /// gets a new tag).
   static final standard = SafeImageModel(
     url: Uri.parse(
-      'https://github.com/HasanMasrur/image_guard/releases/download/'
-      'model-v1/nsfw_mobilenet_v2_140_224.nnef.tar',
+      'https://raw.githubusercontent.com/HasanMasrur/image_guard/model-v1/'
+      'assets/models/nsfw_mobilenet_v2_140_224.nnef.tar',
     ),
     sha256: '8b07fb6e5c401d27782f08c6c17622d1083b74af1fd1738ffebd1c839d818294',
   );
