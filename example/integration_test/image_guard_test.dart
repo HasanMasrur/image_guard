@@ -65,7 +65,7 @@ void main() {
     expect(r.keptOriginal, isTrue);
   });
 
-  test('model loads from the package asset and classifies', () async {
+  test('model downloads, loads and classifies', () async {
     await SafeImage.initialize();
     final r = await SafeImage.classify(
       SafeImageSource.bytes(photoJpeg(800, 600)),

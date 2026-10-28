@@ -11,6 +11,7 @@
 library;
 
 export 'src/exceptions.dart';
+export 'src/model.dart' show SafeImageModel, ModelDownloadProgress;
 export 'src/options.dart';
 export 'src/result.dart';
 export 'src/safe_image.dart';

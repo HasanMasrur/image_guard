@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart'
     show ExternalLibrary, PanicException;
 
 import 'exceptions.dart';
+import 'model.dart';
 import 'options.dart';
 import 'result.dart';
 import 'rust/api/compress.dart' as rust;
@@ -17,22 +16,25 @@ import 'source.dart';
 /// Entry point of the package. All heavy work runs in Rust on a background
 /// thread, so these calls never block the UI.
 abstract final class SafeImage {
-  /// Asset key of the bundled NSFW model.
-  static const modelAsset =
-      'packages/image_guard/assets/models/nsfw_mobilenet_v2_140_224.nnef.tar';
+  /// Where the NSFW model is downloaded from. Change it before first use to
+  /// host the model yourself.
+  static SafeImageModel model = SafeImageModel.standard;
 
   static Future<void>? _native;
   static Future<void>? _model;
 
-  /// Loads the native library and the NSFW model (~100–300 ms).
+  /// Loads the native library and the NSFW model.
   ///
-  /// Optional: every method initializes on first use. Calling it at app
-  /// start (e.g. in `main`) avoids that delay on the first photo.
-  /// Safe to call many times.
+  /// On the first run the model (~18 MB) is downloaded and cached; later runs
+  /// load it from disk (~100–300 ms). Call [downloadModel] earlier (e.g. after
+  /// login) to show progress or to avoid the wait on the first photo.
+  ///
+  /// [modelBytes] loads a model you ship yourself instead of downloading.
+  /// Optional: every method initializes on first use. Safe to call many times.
   static Future<void> initialize({
     bool loadModel = true,
+    Uint8List? modelBytes,
     @visibleForTesting ExternalLibrary? externalLibrary,
-    @visibleForTesting Uint8List? modelBytes,
   }) async {
     await (_native ??= RustLib.init(externalLibrary: externalLibrary)
         .catchError((Object e) {
@@ -45,34 +47,48 @@ abstract final class SafeImage {
     if (loadModel) await _ensureModel(modelBytes);
   }
 
+  /// Downloads the model if it is not cached yet. Does not load it.
+  ///
+  /// Throws [SafeImageException] with [SafeImageErrorCode.modelDownloadFailed].
+  static Future<void> downloadModel({ModelDownloadProgress? onProgress}) =>
+      ensureModelFile(model, onProgress: onProgress);
+
+  /// Whether the model is already cached on this device.
+  static Future<bool> isModelDownloaded() async =>
+      (await model.cachedFile()).exists();
+
+  /// Deletes the cached model. It is downloaded again on next use.
+  static Future<void> deleteDownloadedModel() async {
+    await dispose();
+    final file = await model.cachedFile();
+    if (await file.exists()) await file.delete();
+  }
+
   static Future<void> _ensureModel([Uint8List? modelBytes]) {
     return _model ??= () async {
       try {
-        final bytes = modelBytes ?? await _readModelAsset();
-        await _guard(() => rust.loadModel(model: bytes));
+        if (modelBytes != null) {
+          await _guard(() => rust.loadModel(model: modelBytes));
+          return;
+        }
+        final file = await ensureModelFile(model);
+        try {
+          final bytes = await file.readAsBytes();
+          await _guard(() => rust.loadModel(model: bytes));
+        } on SafeImageException {
+          // A damaged cache would fail forever; download it again next time.
+          await file.delete().catchError((_) => file);
+          rethrow;
+        }
       } catch (e) {
         _model = null;
         if (e is SafeImageException) rethrow;
         throw SafeImageException(
           SafeImageErrorCode.modelLoadFailed,
-          'Cannot read NSFW model asset "$modelAsset": $e',
+          'Cannot read NSFW model: $e',
         );
       }
     }();
-  }
-
-  static Future<Uint8List> _readModelAsset() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    ByteData data;
-    try {
-      data = await rootBundle.load(modelAsset);
-    } catch (_) {
-      // Inside this package's own tests the asset has no `packages/` prefix.
-      data = await rootBundle.load(
-        modelAsset.substring('packages/image_guard/'.length),
-      );
-    }
-    return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
   /// Frees the model memory (~20 MB). It is loaded again on next use.

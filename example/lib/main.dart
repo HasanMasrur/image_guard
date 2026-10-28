@@ -6,8 +6,8 @@ import 'package:image_picker/image_picker.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Load the native library + NSFW model once at startup.
-  await SafeImage.initialize();
+  // Load the native library now; the NSFW model is downloaded in the page.
+  await SafeImage.initialize(loadModel: false);
   runApp(const MaterialApp(home: DemoPage()));
 }
 
@@ -30,6 +30,26 @@ class _DemoPageState extends State<DemoPage> {
   SafeImageProcessResult? _result;
   String? _error;
   bool _busy = false;
+  double? _download = 0; // null = size unknown, 1 = done
+
+  @override
+  void initState() {
+    super.initState();
+    _downloadModel();
+  }
+
+  // First launch downloads the model (~18 MB) once; later launches use the cache.
+  Future<void> _downloadModel() async {
+    try {
+      await SafeImage.downloadModel(
+        onProgress: (received, total) =>
+            setState(() => _download = total == null ? null : received / total),
+      );
+      setState(() => _download = 1);
+    } on SafeImageException catch (e) {
+      setState(() => _error = '${e.code.name}: ${e.message}');
+    }
+  }
 
   int? _parse(TextEditingController c) =>
       c.text.trim().isEmpty ? null : int.tryParse(c.text.trim());
@@ -135,6 +155,11 @@ class _DemoPageState extends State<DemoPage> {
             ],
           ),
           const SizedBox(height: 16),
+          if (_download != 1) ...[
+            const Text('Downloading NSFW model (first launch only)…'),
+            LinearProgressIndicator(value: _download),
+            const SizedBox(height: 8),
+          ],
           if (_busy) const LinearProgressIndicator(),
           if (_error != null)
             Text(

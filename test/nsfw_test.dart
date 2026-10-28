@@ -8,8 +8,6 @@ import 'package:image_guard/image_guard.dart';
 
 import 'helpers.dart';
 
-const modelPath = 'assets/models/nsfw_mobilenet_v2_140_224.nnef.tar';
-
 Matcher throwsCode(SafeImageErrorCode code) =>
     throwsA(isA<SafeImageException>().having((e) => e.code, 'code', code));
 

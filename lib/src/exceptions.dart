@@ -26,8 +26,12 @@ enum SafeImageErrorCode {
   cannotMeetTarget,
   encodingFailed,
 
-  /// The NSFW model could not be loaded (missing asset or invalid file).
+  /// The NSFW model file is invalid.
   modelLoadFailed,
+
+  /// The NSFW model could not be downloaded (no network, HTTP error,
+  /// checksum mismatch).
+  modelDownloadFailed,
 
   /// The NSFW model was unloaded with [SafeImage.dispose] and not reloaded.
   modelNotLoaded,

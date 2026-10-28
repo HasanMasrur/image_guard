@@ -1,6 +1,6 @@
-image_guard bundles the following third-party material:
+image_guard uses the following third-party material:
 
-assets/models/nsfw_mobilenet_v2_140_224.nnef.tar
+nsfw_mobilenet_v2_140_224.nnef.tar (downloaded at runtime from the model-v1 GitHub release)
   Converted (TFLite -> ONNX -> NNEF, unchanged weights) from GantMan/nsfw_model
   release 1.2.0, mobilenet_v2_140_224/saved_model.tflite
   https://github.com/GantMan/nsfw_model

@@ -1,3 +1,14 @@
+## 0.1.0-dev.3
+
+* **The NSFW model is no longer bundled** (−18 MB app size). It is downloaded on
+  first use from the GitHub release, verified with SHA-256 and cached.
+* New `SafeImage.downloadModel(onProgress:)`, `isModelDownloaded()`,
+  `deleteDownloadedModel()` and `SafeImage.model` (`SafeImageModel`) to self-host.
+* `SafeImage.initialize(modelBytes:)` is now public, to ship the model yourself.
+* New error code: `modelDownloadFailed`.
+* Android: the plugin adds the `INTERNET` permission. macOS apps need the
+  `com.apple.security.network.client` entitlement.
+
 ## 0.1.0-dev.2
 
 * **NSFW (18+) detection, on-device.** MobileNetV2 model (GantMan/nsfw_model, MIT)

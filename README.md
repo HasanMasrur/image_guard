@@ -28,7 +28,7 @@ import 'package:image_guard/image_guard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SafeImage.initialize(); // optional: loads the model up front (~0.2 s)
+  await SafeImage.initialize(); // optional: downloads (first run) + loads the model
   runApp(const MyApp());
 }
 
@@ -63,6 +63,41 @@ final small  = await SafeImage.compress(source);   // compression only (no NSFW 
 await SafeImage.dispose();                         // free model memory
 ```
 
+### NSFW model download
+
+The model (~18 MB) is **not bundled** in your app, so it does not add to the
+install size. On first use it is downloaded from this package's
+[GitHub release](https://github.com/HasanMasrur/image_guard/releases/tag/model-v1),
+checked with SHA-256, and cached. Later launches load it from disk, offline.
+
+Download it early (e.g. after login) and show progress:
+
+```dart
+await SafeImage.downloadModel(
+  onProgress: (received, total) => print('$received / $total bytes'),
+);
+await SafeImage.isModelDownloaded();      // true once cached
+await SafeImage.deleteDownloadedModel();  // remove the cache
+```
+
+Host the file yourself (set this before first use):
+
+```dart
+SafeImage.model = SafeImageModel(
+  url: Uri.parse('https://cdn.example.com/nsfw_mobilenet_v2_140_224.nnef.tar'),
+  sha256: '8b07fb6e5c401d27782f08c6c17622d1083b74af1fd1738ffebd1c839d818294',
+);
+```
+
+Or ship it yourself and skip the download:
+`SafeImage.initialize(modelBytes: bytes)`.
+
+Without network on the first run, NSFW calls throw
+`SafeImageErrorCode.modelDownloadFailed`; `compress()` and `info()` still work.
+
+Permissions: Android `INTERNET` is added by the plugin. On **macOS**, add
+`com.apple.security.network.client` to your entitlements. iOS needs nothing.
+
 ### Safety options
 
 | Option | Default | Meaning |
@@ -87,6 +122,7 @@ try {
     case SafeImageErrorCode.unsupportedFormat: // e.g. HEIC, PDF
     case SafeImageErrorCode.corruptImage:
     case SafeImageErrorCode.cannotMeetTarget:  // limit too small for minDimension/minQuality
+    case SafeImageErrorCode.modelDownloadFailed: // no network on first run
     case SafeImageErrorCode.modelLoadFailed:
     default:
   }
@@ -111,7 +147,7 @@ HEIC is not decoded yet. When you use `image_picker`, pass `imageQuality` (or `m
 
 ## Model & license
 
-The bundled model `assets/models/nsfw_mobilenet_v2_140_224.nnef.tar` is converted from [GantMan/nsfw_model](https://github.com/GantMan/nsfw_model) release 1.2.0 (MIT License, Copyright (c) 2020 The nsfw_model Developers). See `NOTICE` and `tool/convert_model.py`.
+The downloaded model `nsfw_mobilenet_v2_140_224.nnef.tar` is converted from [GantMan/nsfw_model](https://github.com/GantMan/nsfw_model) release 1.2.0 (MIT License, Copyright (c) 2020 The nsfw_model Developers). See `NOTICE` and `tool/convert_model.py`.
 
 ## Platform support & requirements
 

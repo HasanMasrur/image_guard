@@ -4,8 +4,11 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_guard/image_guard.dart';
 
+/// The model kept in the repo for tests (apps download it instead).
+const modelPath = 'assets/models/nsfw_mobilenet_v2_140_224.nnef.tar';
+
 /// Loads the Rust library built on the host with
-/// `cargo build --release --manifest-path rust/Cargo.toml`.
+/// `cargo build --release --manifest-path rust/Cargo.toml`, and the model.
 Future<void> initNative() async {
   final name = Platform.isMacOS
       ? 'libimage_guard.dylib'
@@ -18,7 +21,10 @@ Future<void> initNative() async {
       '$path not found. Run: cargo build --release --manifest-path rust/Cargo.toml',
     );
   }
-  await SafeImage.initialize(externalLibrary: ExternalLibrary.open(path));
+  await SafeImage.initialize(
+    externalLibrary: ExternalLibrary.open(path),
+    modelBytes: File(modelPath).readAsBytesSync(),
+  );
 }
 
 /// Photo-like test picture (gradients + noise).

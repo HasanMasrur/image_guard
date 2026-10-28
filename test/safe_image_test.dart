@@ -14,8 +14,8 @@ void main() {
   setUpAll(initNative);
 
   test('initialize is idempotent', () async {
-    await SafeImage.initialize();
-    await SafeImage.initialize();
+    await SafeImage.initialize(loadModel: false);
+    await SafeImage.initialize(loadModel: false);
   });
 
   test('big photo → 50 KB', () async {
